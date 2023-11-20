@@ -1,5 +1,4 @@
 import {
-  type ApiResponse,
   type LoginRequest,
   type RefreshTokenRequest,
   type TokenResponse
@@ -7,6 +6,7 @@ import {
 import { defineStore } from 'pinia'
 import { computed, ref, watchEffect } from 'vue'
 import { Longin, Refresh } from '@/service/authApi'
+import type { AxiosResponse } from 'axios'
 
 /**
  * ใช้สำหรับสร้าง store ของ authentication
@@ -17,12 +17,8 @@ import { Longin, Refresh } from '@/service/authApi'
  * @returns {Object} คืนค่า object ที่ประกอบไปด้วย function ต่างๆ เช่น getToken, setToken, loadAuth, refreshAuth, isExpire, refreshIsExpire, และ hasToken
  */
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<TokenResponse | null>(null)
+  const token = ref<TokenResponse>()
 
-  /**
-   * ฟังก์ชันนี้ใช้สำหรับดึง token จาก localStorage และแปลงเป็น TokenResponse object
-   * @returns TokenResponse object หากมี token ใน localStorage และ null หากไม่มี
-   */
   const getToken = () => {
     const localToken = localStorage.getItem('token')
     if (localToken) {
@@ -30,17 +26,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /**
-   * ตัวแปร computed ที่ใช้เก็บค่า boolean ว่ามี token หรือไม่
-   */
   const hasToken = computed(() => {
     return token.value !== null
   })
 
-  /**
-   * ตรวจสอบว่า token หมดอายุหรือไม่
-   * @returns {boolean} คืนค่า true ถ้า token หมดอายุแล้ว ไม่งั้นคืนค่า false
-   */
   const isExpire = () => {
     if (token.value) {
       const tokenExpire = token.value.accessExpire
@@ -53,10 +42,6 @@ export const useAuthStore = defineStore('auth', () => {
     return false
   }
 
-  /**
-   * ตรวจสอบว่า token สามารถ refresh ได้หรือไม่
-   * @returns คืนค่าเป็น boolean ว่า token สามารถ refresh ได้หรือไม่
-   */
   const refreshIsExpire = () => {
     if (token.value) {
       const tokenExpire = token.value.refreshExpire
@@ -72,34 +57,34 @@ export const useAuthStore = defineStore('auth', () => {
   const setToken = (res: TokenResponse) => {
     localStorage.setItem('token', JSON.stringify(res))
     token.value = res
+    console.log('token', token.value)
   }
 
   // transfer token from api & refresh  token
-  const transfer = (response: ApiResponse<TokenResponse>) => {
-    if (response.code == 0) {
-      if (response.result) {
-        setToken(response.result)
-      }
+  const transfer = (response: AxiosResponse<TokenResponse>) => {
+    if (response.status === 200) {
+      setToken(response.data)
     }
-    if (response.code != 0) {
-      console.log(response.code)
-      return response.code
+    if (response.status === 401) {
+      console.log('error', response.data)
+      return response.status
     }
   }
 
   const loadAuth = async (data: LoginRequest) => {
     const res = await Longin(data)
-    transfer(res.data)
+    transfer(res)
+    console.log('token', token.value)
   }
 
   const refreshAuth = async (refreshToken: RefreshTokenRequest) => {
     const res = await Refresh(refreshToken)
-    return transfer(res.data)
+    transfer(res)
   }
 
   watchEffect(() => {
-    console.log('watchEffect working')
     isExpire()
+    getToken()
   })
 
   return { token, getToken, setToken, loadAuth, refreshAuth, isExpire, refreshIsExpire, hasToken }

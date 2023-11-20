@@ -60,11 +60,10 @@ const rule: Record<string, Rule[]> = {
 
 const handleSubmit = async () => {
   try {
-    const res = authStore.loadAuth({
+    authStore.loadAuth({
       username: formLongin.value.username,
       password: formLongin.value.password
     })
-    console.log(res)
 
     router.push('home')
   } catch (error) {

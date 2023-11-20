@@ -17,6 +17,7 @@ const { t } = useI18n()
 const item = computed<ItemType[]>(() => [
   {
     key: 'sub1',
+    label: t('subMenu.user'),
     icon: () => h(UserOutlined),
     children: [
       {
@@ -39,6 +40,7 @@ const item = computed<ItemType[]>(() => [
   },
   {
     key: 'sub2',
+    label: t('subMenu.orders'),
     icon: () => h(ShoppingCartOutlined),
     children: [
       {
@@ -53,6 +55,7 @@ const item = computed<ItemType[]>(() => [
   },
   {
     key: 'sub3',
+    label: t('subMenu.stock'),
     icon: () => h(ShopOutlined),
     children: [
       {
@@ -75,6 +78,7 @@ const item = computed<ItemType[]>(() => [
   },
   {
     key: 'sub4',
+    label: t('subMenu.admin'),
     icon: () => h(UserSwitchOutlined),
     children: [
       {

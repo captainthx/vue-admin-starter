@@ -8,6 +8,12 @@ const lang = {
       product: 'product list',
       admin: 'admin list',
       adminLogs: 'admin logs list'
+    },
+    subMenu: {
+      user: 'user',
+      orders: 'orders',
+      stock: 'stock',
+      admin: 'admin'
     }
   },
   th: {
@@ -19,6 +25,12 @@ const lang = {
       product: 'รายการสินค้า',
       admin: 'รายชื่อผู้ดูแลระบบ',
       adminLogs: 'บันทึกผู้ดูแลระบบ'
+    },
+    subMenu: {
+      user: 'ผู้ใช้',
+      orders: 'รายการสั่งซื้อ',
+      stock: 'สต็อก',
+      admin: 'ผู้ดูแลระบบ'
     }
   },
   ja: {
@@ -30,6 +42,12 @@ const lang = {
       product: '製品リスト',
       admin: '管理者リスト',
       adminLogs: '管理者ログ'
+    },
+    subMenu: {
+      user: 'ユーザー',
+      orders: '注文',
+      stock: '在庫',
+      admin: '管理者'
     }
   }
 }
