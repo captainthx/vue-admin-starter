@@ -37,15 +37,9 @@ const routerList: RouteRecordRaw[] = [
         meta: { requiresAuth: true }
       },
       {
-        path: 'stock',
-        name: 'stock',
-        component: () => import('@/views/stock/StockListView.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
         path: 'product',
         name: 'product',
-        component: () => import('@/views/stock/ProductListView.vue'),
+        component: () => import('@/views/product/ProductListView.vue'),
         meta: { requiresAuth: true }
       },
       {

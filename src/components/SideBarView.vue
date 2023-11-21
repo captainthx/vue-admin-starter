@@ -55,17 +55,9 @@ const item = computed<ItemType[]>(() => [
   },
   {
     key: 'sub3',
-    label: t('subMenu.stock'),
+    label: t('subMenu.product'),
     icon: () => h(ShopOutlined),
     children: [
-      {
-        key: 'stock',
-        label: t('menu.stock'),
-        icon: () => h(OrderedListOutlined),
-        onClick: () => {
-          router.push('stock')
-        }
-      },
       {
         key: 'product',
         label: t('menu.product'),

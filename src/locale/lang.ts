@@ -12,7 +12,7 @@ const lang = {
     subMenu: {
       user: 'user',
       orders: 'orders',
-      stock: 'stock',
+      product: 'product',
       admin: 'admin'
     }
   },
