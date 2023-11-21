@@ -58,3 +58,14 @@ export interface PaginationResponse {
   records: number
   pages: number
 }
+
+export interface OrdersResponse {
+  id: number
+  cdt: number
+  udt: number
+  productId: number
+  totalQuantity: number
+  totalPrice: number
+  costPerProduct: number
+  pricePerProduct: number
+}

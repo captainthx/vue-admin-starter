@@ -79,14 +79,14 @@ const fetchData = async () => {
       size: defaultPagination.value.pageSize as ConstantPagination.DEFAULT_LIMIT
     })
     if (res.status == 200) {
-      if (res.data) {
+      if (res.data.result) {
         historyData.value = res.data.result
 
         records.value = res.data.pagination.records
       }
     }
     if (res.status != 200) {
-      message.error('load data error')
+      message.error('load data error', res.status)
     }
   } catch (error) {
     console.log(error)
@@ -123,6 +123,10 @@ onBeforeMount(() => {
 <template>
   <a-layout-content class="content">
     <h2>login logs</h2>
+
+    <div style="display: flex; flex-flow: row-reverse">
+      <a-button type="primary">add</a-button>
+    </div>
     <a-table
       :dataSource="historyData"
       :columns="columns"
