@@ -1,13 +1,10 @@
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/authStore'
-import type { LoginRequest, RefreshTokenRequest, ServerResponse, TokenResponse } from './index.d'
+import type { LoginRequest, RefreshTokenRequest, TokenResponse, ServerResponse } from './index.d'
 import client from './request'
-import type { AxiosResponse } from 'axios'
 
-const Longin = (data: LoginRequest): Promise<AxiosResponse<TokenResponse>> =>
+const Longin = (data: LoginRequest): ServerResponse<TokenResponse> =>
   client.post('/v1/auth/login', data)
 
-const Refresh = (refreshToken: RefreshTokenRequest): Promise<AxiosResponse<TokenResponse>> =>
+const Refresh = (refreshToken: RefreshTokenRequest): ServerResponse<TokenResponse> =>
   client.post('/v1/auth/refresh', refreshToken)
 
 export { Longin, Refresh }

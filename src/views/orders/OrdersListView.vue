@@ -24,24 +24,21 @@ const columns = ref<ColumnsType>([
     dataIndex: 'id'
   },
   {
+    title: 'uid',
+    dataIndex: 'uid'
+  },
+  {
     title: 'productId',
     dataIndex: 'productId'
   },
   {
-    title: 'totalQuantity',
-    dataIndex: 'totalQuantity'
+    title: 'ordersId',
+    dataIndex: 'ordersId'
   },
+
   {
-    title: 'totalPrice',
-    dataIndex: 'totalPrice'
-  },
-  {
-    title: 'costPerProduct',
-    dataIndex: 'costPerProduct'
-  },
-  {
-    title: 'pricePerProduct',
-    dataIndex: 'pricePerProduct'
+    title: 'amount',
+    dataIndex: 'amount'
   },
   {
     title: 'cdt',
@@ -87,7 +84,7 @@ onBeforeMount(() => {
 
 <template>
   <a-layout-content class="content">
-    <h2>orders list</h2>
+    <h2 class="font-semibold text-2xl">orders list</h2>
     <a-table
       :columns="columns"
       :dataSource="ordersData"

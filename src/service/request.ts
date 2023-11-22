@@ -1,6 +1,6 @@
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 
 const client: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_API,
@@ -10,10 +10,18 @@ const client: AxiosInstance = axios.create({
 })
 
 client.interceptors.request.use(async (config) => {
+  const ignorePath = ['/v1/auth/login', '/v1/auth/refresh']
+
+  if (config.url && ignorePath.some((path) => config.url?.includes(path))) return config
+
   const authStore = useAuthStore()
   const { token } = storeToRefs(authStore)
 
+  if (authStore.isExpire()) {
+    await authStore.refreshAuth({ refreshToken: token.value?.refreshToken ?? '' })
+  }
   config.headers.Authorization = `Bearer ${token.value?.accessToken}`
+
   return config
 })
 

@@ -57,7 +57,6 @@ export const useAuthStore = defineStore('auth', () => {
   const setToken = (res: TokenResponse) => {
     localStorage.setItem('token', JSON.stringify(res))
     token.value = res
-    console.log('token', token.value)
   }
 
   // transfer token from api & refresh  token
@@ -67,14 +66,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
     if (response.status === 401) {
       console.log('error', response.data)
-      return response.status
     }
   }
 
   const loadAuth = async (data: LoginRequest) => {
-    const res = await Longin(data)
-    transfer(res)
-    console.log('token', token.value)
+    try {
+      const res = await Longin(data)
+      if (res.status === 200) {
+        setToken(res.data)
+      }
+      if (res.status === 401) {
+        console.log('error', res.data)
+      }
+    } catch (error) {
+      // console.log(error)
+    }
   }
 
   const refreshAuth = async (refreshToken: RefreshTokenRequest) => {

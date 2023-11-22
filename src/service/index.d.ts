@@ -61,13 +61,13 @@ export interface PaginationResponse {
 
 export interface OrdersResponse {
   id: number
+  uid: number
+  ordersId: string
+  productId: number
+  productName: string
+  amount: number
   cdt: number
   udt: number
-  productId: number
-  totalQuantity: number
-  totalPrice: number
-  costPerProduct: number
-  pricePerProduct: number
 }
 
 export interface ProductResponse {
@@ -83,6 +83,14 @@ export interface ProductResponse {
   productImage: string
   category: Category
 }
+export interface CreateProductResponse {
+  productId: number
+  productName: string
+  categoryId: number
+  stockQuantity: number
+  price: number
+  cost: number
+}
 
 export interface Category {
   id: number
@@ -91,4 +99,12 @@ export interface Category {
 
 export interface OrdersParams extends Pagination {
   categoryId?: number
+}
+
+export interface CreateProductRequest {
+  productName: string
+  price: number
+  cost: number
+  stockQuantity: number
+  categoryId: number
 }

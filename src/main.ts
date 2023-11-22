@@ -8,6 +8,7 @@ import App from './App.vue'
 import router from './router'
 import { createI18n } from 'vue-i18n'
 import lang from './locale/lang'
+import './index.css'
 
 const app = createApp(App)
 

@@ -6,6 +6,8 @@ import { message } from 'ant-design-vue'
 import type { LoginRequest } from '@/service'
 import { useAuthStore } from '@/stores/authStore'
 import router from '@/router'
+import { Longin } from '@/service/authApi'
+import { AxiosError } from 'axios'
 
 const authStore = useAuthStore()
 
@@ -22,7 +24,7 @@ const layout = {
   wrapperCol: { span: 5 }
 }
 
-const checkUsername = (rule: Rule, value: string) => {
+const checkUsername = (_rule: Rule, value: string) => {
   if (!value) {
     return Promise.reject('Please input your username!')
   } else if (value.length < 4 || value.length > 10) {
@@ -31,7 +33,7 @@ const checkUsername = (rule: Rule, value: string) => {
     return Promise.resolve()
   }
 }
-const checkPassword = (rule: Rule, value: string) => {
+const checkPassword = (_rule: Rule, value: string) => {
   if (!value) {
     return Promise.reject('Please input your password!')
   } else if (value.length < 4) {
@@ -60,14 +62,24 @@ const rule: Record<string, Rule[]> = {
 
 const handleSubmit = async () => {
   try {
-    authStore.loadAuth({
+    const res = await Longin({
       username: formLongin.value.username,
       password: formLongin.value.password
     })
-
-    router.push('home')
-  } catch (error) {
-    message.error(`login error ${error}`)
+    if (res.status == 200) {
+      if (res.data) {
+        authStore.setToken(res.data)
+      }
+      router.push('home')
+    }
+  } catch (error: unknown) {
+    if (typeof error === 'string') {
+      message.error('error' + error)
+    } else if (error instanceof AxiosError) {
+      const axiosError = error as AxiosError
+      const responseData = axiosError.response?.data as { message: string }
+      message.error(responseData.message)
+    }
   }
 }
 </script>
@@ -96,7 +108,7 @@ const handleSubmit = async () => {
         </a-input-password>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: defaultWapperCol.offset, span: defaultWapperCol.span }">
-        <a-button type="primary" html-type="submit" @click="handleSubmit">Submit</a-button>
+        <a-button html-type="submit" @click="handleSubmit">Submit</a-button>
       </a-form-item>
     </a-form>
   </div>
