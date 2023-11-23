@@ -95,7 +95,7 @@ const item = computed<ItemType[]>(() => [
 </script>
 
 <template>
-  <a-layout-sider style="height: 100vh">
+  <a-layout-sider class="layout">
     <div>
       <a-menu mode="inline" theme="dark" :items="item" />
     </div>

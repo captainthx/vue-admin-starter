@@ -68,7 +68,7 @@ const switchLang = () => {
         />
       </a-menu>
       <a-menu theme="dark">
-        <LoginOutlined v-if="authStore.isExpire()" @click="router.push({ path: '/login' })" />
+        <!-- <LoginOutlined v-if="authStore.tokenExpire" @click="router.push({ path: '/login' })" /> -->
         <a-dropdown placement="bottom" class="mt-5">
           <Icon icon="ant-design:user-outlined" :width="20" />
           <template #overlay>

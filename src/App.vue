@@ -20,8 +20,7 @@ const { themes } = storeToRefs(useThemeStore())
 }
 .content {
   text-align: center;
-  height: 100vh;
-  padding: 20px;
+  max-height: 100vh;
   /* background-color: blanchedalmond; */
 }
 </style>
