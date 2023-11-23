@@ -14,7 +14,7 @@ import type { AxiosResponse } from 'axios'
  */
 /**
  * สร้าง store สำหรับจัดการข้อมูล authentication
- * @returns {Object} คืนค่า object ที่ประกอบไปด้วย function ต่างๆ เช่น getToken, setToken, loadAuth, refreshAuth, isExpire, refreshIsExpire, และ hasToken
+ * @returns {Object} คืนค่า object ที่ประกอบไปด้วย function ต่างๆ เช่น getToken, setToken, loadAuth, refreshAuth, tokenExpire, refreshtokenExpire, และ hasToken
  */
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<TokenResponse>()
@@ -30,29 +30,18 @@ export const useAuthStore = defineStore('auth', () => {
     return token.value !== null
   })
 
-  const isExpire = () => {
+  /**
+   * ตรวจสอบว่า token หมดอายุหรือไม่
+   * @returns {boolean} ค่าเป็น true ถ้า token หมดอายุแล้ว และเป็น false ถ้า token ยังไม่หมดอายุ
+   */
+  const tokenExpire = computed(() => {
     if (token.value) {
-      const tokenExpire = token.value.accessExpire
-      if (tokenExpire) {
-        const expire = new Date(token.value.accessExpire)
-        const now = new Date()
-        if (now.getTime() + 60 * 1000 > expire.getTime()) return true
-      }
+      const expire = new Date(token.value.accessExpire)
+      const now = new Date()
+      if (now.getTime() + 60 * 1000 > expire.getTime()) return true
     }
     return false
-  }
-
-  const refreshIsExpire = () => {
-    if (token.value) {
-      const tokenExpire = token.value.refreshExpire
-      if (tokenExpire) {
-        const expire = new Date(token.value.refreshExpire)
-        const now = new Date()
-        if (now.getTime() + 60 * 1000 > expire.getTime()) return true
-      }
-    }
-    return false
-  }
+  })
 
   const setToken = (res: TokenResponse) => {
     localStorage.setItem('token', JSON.stringify(res))
@@ -89,9 +78,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   watchEffect(() => {
-    isExpire()
     getToken()
   })
 
-  return { token, getToken, setToken, loadAuth, refreshAuth, isExpire, refreshIsExpire, hasToken }
+  return { token, getToken, setToken, loadAuth, refreshAuth, tokenExpire, hasToken }
 })
