@@ -3,10 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import axios, { type AxiosInstance } from 'axios'
 
 const client: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BASE_API,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: import.meta.env.VITE_BASE_API
 })
 
 client.interceptors.request.use(async (config) => {

@@ -107,7 +107,8 @@ export interface ProductParams extends Pagination {
 }
 
 export interface CreateProductRequest {
-  id: number
+  id?: number
+  productImage: string
   productName: string
   price: number
   cost: number
@@ -123,4 +124,12 @@ export interface UpdProductRequest {
 
 export interface DeleteProductRequest {
   productId: number
+}
+
+export interface ImageUpaloadResponse {
+  urlPath: string
+  imageName: string
+}
+export interface ImgaeRequest {
+  file: FormData
 }

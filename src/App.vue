@@ -16,11 +16,11 @@ const { themes } = storeToRefs(useThemeStore())
 
 <style>
 .layout {
-  height: 100vh;
+  min-height: 100vh;
 }
 .content {
   text-align: center;
-  max-height: 100vh;
+  min-height: 100vh;
   /* background-color: blanchedalmond; */
 }
 </style>

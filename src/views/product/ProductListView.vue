@@ -6,10 +6,17 @@ import type { ColumnsType, TableProps } from 'ant-design-vue/es/table'
 import { computed, createVNode, onBeforeMount, ref } from 'vue'
 import { formatDate } from '@/utils/dayjs'
 import type { FormInstance, Rule } from 'ant-design-vue/es/form'
-import { Form, message, Modal } from 'ant-design-vue'
+import { Form, message, Modal, type UploadProps } from 'ant-design-vue'
 import { AxiosError } from 'axios'
 import { GetCategoryList } from '@/service/category'
-import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  LoadingOutlined,
+  PlusOutlined
+} from '@ant-design/icons-vue'
+import { UpLoadImage } from '@/service/file'
 
 const records = ref<number>(0)
 const productData = ref<ProductResponse[]>([])
@@ -17,9 +24,15 @@ const categoryData = ref<Category[]>([])
 const openModal = ref<boolean>(false)
 const formRef = ref<FormInstance>()
 let modalType: 'add' | 'edit' = 'add'
+const fileList = ref<UploadProps['fileList']>([])
+const imagUrl = ref<string>('')
+const imageName = ref<string>('')
+const loading = ref<boolean>(false)
+const fileUrl = import.meta.env.VITE_BASE_API + '/v1/image/'
 const fromCreateProdcut = ref<CreateProductRequest>({
   id: 0,
   productName: '',
+  productImage: '',
   price: 0,
   cost: 0,
   stockQuantity: 0,
@@ -46,45 +59,56 @@ const defaultPagination = computed(() => {
 const columns = ref<ColumnsType>([
   {
     title: 'id',
-    dataIndex: 'id'
+    dataIndex: 'id',
+    align: 'center'
   },
   {
-    title: 'categoryId',
-    dataIndex: 'category.id',
-    customRender: ({ record }) => record.category.id
+    title: 'image',
+    dataIndex: 'image',
+    align: 'center',
+    width: 100,
+    fixed: true
   },
   {
     title: 'categoryName',
     dataIndex: 'category.categoryName',
-    customRender: ({ record }) => record.category.categoryName
+    customRender: ({ record }) => record.category.categoryName,
+    align: 'center'
   },
   {
     title: 'stockQuantity',
-    dataIndex: 'stockQuantity'
+    dataIndex: 'stockQuantity',
+    align: 'center'
   },
   {
     title: 'productName',
-    dataIndex: 'productName'
+    dataIndex: 'productName',
+    align: 'center'
   },
   {
     title: 'cost',
-    dataIndex: 'cost'
+    dataIndex: 'cost',
+    align: 'center'
   },
   {
     title: 'price',
-    dataIndex: 'price'
+    dataIndex: 'price',
+    align: 'center'
   },
   {
     title: 'cdt',
-    dataIndex: 'cdt'
+    dataIndex: 'cdt',
+    align: 'center'
   },
   {
     title: 'udt',
-    dataIndex: 'udt'
+    dataIndex: 'udt',
+    align: 'center'
   },
   {
     title: 'operate',
-    dataIndex: 'operate'
+    dataIndex: 'operate',
+    align: 'center'
   }
 ])
 const rules: Record<string, Rule[]> = {
@@ -222,6 +246,7 @@ const handleCreateProduct = () => {
       try {
         const res = await CreateProduct({
           productName: fromCreateProdcut.value.productName,
+          productImage: imageName.value,
           price: fromCreateProdcut.value.price,
           cost: fromCreateProdcut.value.cost,
           stockQuantity: fromCreateProdcut.value.stockQuantity,
@@ -294,9 +319,6 @@ const showDeleteConfirm = (id: number) => {
     cancelText: 'No',
     onOk() {
       handleDeleteProduct(id)
-    },
-    onCancel() {
-      console.log('Cancel')
     }
   })
 }
@@ -323,6 +345,43 @@ const handleDeleteProduct = async (id: number) => {
 
 const handleSearchByCategory = (id: number) => {
   fetchData(id)
+}
+const beforeUpload = (file: File) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG/PNG file!')
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    message.error('Image must smaller than 2MB!')
+  }
+  return isJpgOrPng && isLt2M
+}
+const upload = async (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file.file)
+  loading.value = true
+  try {
+    const res = await UpLoadImage(formData)
+    if (res.status == 200) {
+      if (fileList.value) {
+        fileList.value.push({
+          uid: '-1',
+          name: res.data.imageName,
+          status: 'done',
+          url: fileUrl + res.data.urlPath
+        })
+      }
+      imagUrl.value = fileUrl + res.data.imageName
+      imageName.value = res.data.imageName
+      loading.value = false
+    }
+  } catch (error) {
+    console.log('upload error', error)
+  }
+}
+const getImage = (name: string) => {
+  return fileUrl + name
 }
 
 const handleTableChange: TableProps['onChange'] = (pagination, filters, sorter) => {
@@ -355,7 +414,7 @@ onBeforeMount(() => {
         @click="handleSearchByCategory(formCategory.id)"
         >search</a-button
       >
-      <div class="col-end-7 mb-1">
+      <div class="col-end-7 mb-1 p-1">
         <a-button @click="showModal">add</a-button>
       </div>
     </div>
@@ -376,6 +435,9 @@ onBeforeMount(() => {
           <EditOutlined @click="showEditModal(record)" class="pr-2" />
           <DeleteOutlined @click="showDeleteConfirm(record.id)" />
         </template>
+        <template v-if="column.dataIndex == 'image'">
+          <a-image :src="getImage(record.productImage)" :width="100" />
+        </template>
       </template>
     </a-table>
 
@@ -391,6 +453,24 @@ onBeforeMount(() => {
         class="pt-2 mt-4"
         @submit="handleSubmit"
       >
+        <a-form-item label="image">
+          <a-upload
+            name="avatar"
+            v-model:file-list="fileList"
+            :showUploadList="false"
+            list-type="picture-card"
+            :beforeUpload="beforeUpload"
+            :customRequest="upload"
+            class="avatar-uploader"
+          >
+            <img v-if="imagUrl" :src="imagUrl" alt="avatar" />
+            <div v-else>
+              <loading-outlined v-if="loading"></loading-outlined>
+              <plus-outlined v-else></plus-outlined>
+              <div class="ant-upload-text">Upload</div>
+            </div>
+          </a-upload>
+        </a-form-item>
         <a-form-item v-if="modalType == 'add'" label="ProductName" name="productName" hasFeedback>
           <a-input v-model:value="fromCreateProdcut.productName" />
         </a-form-item>
@@ -423,5 +503,18 @@ onBeforeMount(() => {
 <style scoped>
 .select {
   width: 70%;
+}
+.avatar-uploader > .ant-upload {
+  width: 128px;
+  height: 128px;
+}
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
 }
 </style>
