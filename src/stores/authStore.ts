@@ -4,7 +4,7 @@ import {
   type TokenResponse
 } from './../service/index.d'
 import { defineStore } from 'pinia'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import { Longin, Refresh } from '@/service/authApi'
 import type { AxiosResponse } from 'axios'
 
@@ -26,6 +26,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * ตรวจสอบว่ามี token หรือไม่
+   * @returns {boolean} ค่าเป็น true ถ้ามี token และ false ถ้าไม่มี
+   */
   const hasToken = computed(() => {
     return token.value !== null
   })
@@ -34,14 +38,14 @@ export const useAuthStore = defineStore('auth', () => {
    * ตรวจสอบว่า token หมดอายุหรือไม่
    * @returns {boolean} ค่าเป็น true ถ้า token หมดอายุแล้ว และเป็น false ถ้า token ยังไม่หมดอายุ
    */
-  const tokenExpire = computed(() => {
-    if (token.value) {
-      const expire = new Date(token.value.accessExpire)
+  const tokenExpire = (): boolean => {
+    if (hasToken.value && token.value) {
+      const expire = new Date(token.value.accessTokenExpire)
       const now = new Date()
-      if (now.getTime() + 60 * 1000 > expire.getTime()) return true
+      return now.getTime() + 60 * 1000 < expire.getTime()
     }
     return false
-  })
+  }
 
   const setToken = (res: TokenResponse) => {
     localStorage.setItem('token', JSON.stringify(res))

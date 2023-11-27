@@ -9,9 +9,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-
   if (to.meta.requiresAuth) {
-    if (authStore.tokenExpire) {
+    if (!authStore.tokenExpire()) {
       next({ name: 'login' })
     }
   }

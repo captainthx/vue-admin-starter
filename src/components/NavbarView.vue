@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import { UserOutlined, HomeOutlined, LoginOutlined, GlobalOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined } from '@ant-design/icons-vue'
 import { Icon } from '@iconify/vue'
-import { useThemeStore } from '@/stores/theme'
-import { storeToRefs } from 'pinia'
 import { message, type SelectProps } from 'ant-design-vue'
-import { ref, h } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import routerList from '../router/routeConfig'
 import router from '@/router'
-import { useAuthStore } from '@/stores/authStore'
 
 const i18n = useI18n()
-const authStore = useAuthStore()
 
 const handleLogout = () => {
   message.success('Logout success')
@@ -32,19 +27,6 @@ const langoptions = ref<SelectProps['options']>([
     value: 'ja'
   }
 ])
-
-const switchLang = () => {
-  switch (i18n.locale.value) {
-    case 'en':
-      i18n.locale.value = 'th'
-      break
-    case 'th':
-      i18n.locale.value = 'ja'
-      break
-    default:
-      i18n.locale.value = 'en'
-  }
-}
 </script>
 
 <template>

@@ -1,3 +1,4 @@
+import type { NumberLiteralType } from 'typescript'
 import { ConstantPagination } from './enum'
 import type { AxiosResponse } from 'axios'
 
@@ -23,8 +24,8 @@ export interface SuccessResponse {
 export interface TokenResponse {
   accessToken: string
   refreshToken: string
-  accessExpire: number
-  refreshExpire: number
+  accessTokenExpire: number
+  refreshTokenExpire: number
 }
 
 export interface TokenPayload {
@@ -132,4 +133,14 @@ export interface ImageUpaloadResponse {
 }
 export interface ImgaeRequest {
   file: FormData
+}
+
+export interface AdminLogsResponse {
+  uid: Number
+  type: number
+  atTime: number
+  after: string
+  previous: string
+  cdt: number
+  udt: number
 }

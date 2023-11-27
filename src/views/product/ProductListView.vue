@@ -66,8 +66,7 @@ const columns = ref<ColumnsType>([
     title: 'image',
     dataIndex: 'image',
     align: 'center',
-    width: 100,
-    fixed: true
+    width: 100
   },
   {
     title: 'categoryName',
@@ -232,11 +231,13 @@ const showEditModal = (record: ProductResponse) => {
   fromCreateProdcut.value = {
     id: record.id,
     productName: record.productName,
+    productImage: record.productImage,
     price: record.price,
     cost: record.cost,
     stockQuantity: record.stockQuantity,
     categoryId: record.category.id
   }
+  imagUrl.value = getImage(record.productImage)
 }
 const userForm = Form.useForm
 const { validate } = userForm(formRef)
@@ -372,12 +373,13 @@ const upload = async (file: File) => {
           url: fileUrl + res.data.urlPath
         })
       }
-      imagUrl.value = fileUrl + res.data.imageName
+      imagUrl.value = getImage(res.data.imageName)
       imageName.value = res.data.imageName
       loading.value = false
     }
   } catch (error) {
     console.log('upload error', error)
+    message.error('upload error')
   }
 }
 const getImage = (name: string) => {
@@ -463,7 +465,7 @@ onBeforeMount(() => {
             :customRequest="upload"
             class="avatar-uploader"
           >
-            <img v-if="imagUrl" :src="imagUrl" alt="avatar" />
+            <img v-if="imagUrl" :src="fromCreateProdcut.productImage" alt="avatar" />
             <div v-else>
               <loading-outlined v-if="loading"></loading-outlined>
               <plus-outlined v-else></plus-outlined>
