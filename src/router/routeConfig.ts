@@ -5,13 +5,14 @@
  * @property {string} name - ชื่อของเส้นทาง
  * @property {Function} component - ฟังก์ชันที่ส่งคืน Promise สำหรับคอมโพเนนต์ที่จะแสดงเมื่อเยี่ยมชมเส้นทาง
  */
-import { type RouteRecordRaw } from 'vue-router'
+import { type RouteRecordRaw } from 'vue-router';
 
 const routerList: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'admin',
+    name: 'layout',
     component: () => import('@/layout/LayoutView.vue'),
+    meta: { auth: true },
     children: [
       {
         path: 'home',
@@ -19,40 +20,9 @@ const routerList: RouteRecordRaw[] = [
         component: () => import('@/views/HomeView.vue')
       },
       {
-        path: 'user',
-        name: 'user',
-        component: () => import('@/views/user/UserListView.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
         path: 'loginLogs',
         name: 'loginLogs',
-        component: () => import('@/views/user/LoginLogsView.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'orders',
-        name: 'orders',
-        component: () => import('@/views/orders/OrdersListView.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'product',
-        name: 'product',
-        component: () => import('@/views/product/ProductListView.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'admin',
-        name: 'admin',
-        component: () => import('@/views/admin/AdminListView.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'adminLogs',
-        name: 'adminLogs',
-        component: () => import('@/views/admin/AdminLogsListView.vue'),
-        meta: { requiresAuth: true }
+        component: () => import('@/views/user/LoginLogsView.vue')
       }
     ]
   },
@@ -60,7 +30,12 @@ const routerList: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'notFound',
+    component: () => import('@/views/NotFound.vue')
   }
-]
+];
 
-export default routerList
+export default routerList;

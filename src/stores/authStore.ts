@@ -1,89 +1,76 @@
-import {
-  type LoginRequest,
-  type RefreshTokenRequest,
-  type TokenResponse
-} from './../service/index.d'
-import { defineStore } from 'pinia'
-import { computed, ref, watch, watchEffect } from 'vue'
-import { Longin, Refresh } from '@/service/authApi'
-import type { AxiosResponse } from 'axios'
+import type { ApiResponse, TokenPayload, TokenResponse } from '../types';
+import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
+import type { AxiosResponse } from 'axios';
+import router from '@/router';
+import client from '@/service/request';
+import { refresh } from '@/service/authApi';
 
-/**
- * ใช้สำหรับสร้าง store ของ authentication
- * @returns {Object} คืนค่า method สำหรับการจัดการ token
- */
-/**
- * สร้าง store สำหรับจัดการข้อมูล authentication
- * @returns {Object} คืนค่า object ที่ประกอบไปด้วย function ต่างๆ เช่น getToken, setToken, loadAuth, refreshAuth, tokenExpire, refreshtokenExpire, และ hasToken
- */
+const store = {
+  get: () => localStorage.getItem('token'),
+  set: (value: TokenResponse) => localStorage.setItem('token', JSON.stringify(value)),
+  remove: () => localStorage.removeItem('token')
+};
+
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<TokenResponse>()
+  const token = ref<TokenResponse | null>(null);
+  const payload = ref<TokenPayload | null>(null);
+  const isAuthenticated = computed(() => token.value !== null && payload.value !== null);
 
-  const getToken = () => {
-    const localToken = localStorage.getItem('token')
-    if (localToken) {
-      return (token.value = JSON.parse(localToken) as TokenResponse)
+  const transfer = (response: AxiosResponse<ApiResponse<TokenResponse>>) => {
+    if (response.status === 200 && response.data.result) {
+      token.value = response.data.result;
+      store.set(token.value);
+
+      const timeout = (token.value.accessTokenExpire - Math.floor(Date.now() / 1000) - 60) * 1000;
+      const refreshText = token.value.refreshToken;
+      setTimeout(async () => {
+        await refreshAuth(refreshText);
+      }, timeout);
+      router.push({ name: 'layout' });
     }
-  }
+  };
 
-  /**
-   * ตรวจสอบว่ามี token หรือไม่
-   * @returns {boolean} ค่าเป็น true ถ้ามี token และ false ถ้าไม่มี
-   */
-  const hasToken = computed(() => {
-    return token.value !== null
-  })
+  const loadAuth = async () => {
+    token.value = store.get() ? (JSON.parse(store.get() as string) as TokenResponse) : null;
+    if (token.value) {
+      payload.value = JSON.parse(atob(token.value.accessToken.split('.')[1]));
 
-  /**
-   * ตรวจสอบว่า token หมดอายุหรือไม่
-   * @returns {boolean} ค่าเป็น true ถ้า token หมดอายุแล้ว และเป็น false ถ้า token ยังไม่หมดอายุ
-   */
-  const tokenExpire = (): boolean => {
-    if (hasToken.value && token.value) {
-      const expire = new Date(token.value.accessTokenExpire)
-      const now = new Date()
-      return now.getTime() + 60 * 1000 < expire.getTime()
+      if (token.value.accessTokenExpire - Math.floor(Date.now() / 1000) < 60) {
+        await refreshAuth(token.value.refreshToken);
+      }
+
+      if (token.value.accessTokenExpire - Math.floor(Date.now() / 1000) < 0) {
+        logout();
+      }
+      client.interceptors.request.use(
+        (config) => {
+          if (token.value) {
+            config.headers.Authorization = `Bearer ${token.value.accessToken}`;
+          }
+          return config;
+        },
+        (error) => {
+          return Promise.reject(error);
+        }
+      );
+    } else {
+      logout();
     }
-    return false
-  }
+  };
 
-  const setToken = (res: TokenResponse) => {
-    localStorage.setItem('token', JSON.stringify(res))
-    token.value = res
-  }
-
-  // transfer token from api & refresh  token
-  const transfer = (response: AxiosResponse<TokenResponse>) => {
-    if (response.status === 200) {
-      setToken(response.data)
-    }
-    if (response.status === 401) {
-      console.log('error', response.data)
-    }
-  }
-
-  const loadAuth = async (data: LoginRequest) => {
+  const refreshAuth = async (refreshToken: string) => {
     try {
-      const res = await Longin(data)
-      if (res.status === 200) {
-        setToken(res.data)
-      }
-      if (res.status === 401) {
-        console.log('error', res.data)
-      }
+      await transfer(await refresh({ refreshToken }));
     } catch (error) {
-      // console.log(error)
+      console.error(error);
     }
-  }
-
-  const refreshAuth = async (refreshToken: RefreshTokenRequest) => {
-    const res = await Refresh(refreshToken)
-    transfer(res)
-  }
-
-  watchEffect(() => {
-    getToken()
-  })
-
-  return { token, getToken, setToken, loadAuth, refreshAuth, tokenExpire, hasToken }
-})
+  };
+  const logout = () => {
+    token.value = null;
+    payload.value = null;
+    store.remove();
+    router.push({ name: 'login' });
+  };
+  return { token, payload, isAuthenticated, transfer, loadAuth, logout };
+});

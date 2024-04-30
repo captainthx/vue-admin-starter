@@ -1,26 +1,22 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { theme } from 'ant-design-vue'
-import { storeToRefs } from 'pinia'
-import { useThemeStore } from '@/stores/theme'
-const { themes } = storeToRefs(useThemeStore())
+import { RouterView } from 'vue-router';
+import dayjs from 'dayjs';
+import { computed } from 'vue';
+import i18n from '@/locale';
+import enUS from 'ant-design-vue/es/locale/en_US';
+import thTH from 'ant-design-vue/es/locale/th_TH';
+
+const language = computed(() => i18n.global.locale.value.split('-')[0]);
+const locale = computed(() => (language.value === 'en' ? enUS : thTH));
+dayjs.locale(language.value);
+
+locale.effect.onTrigger = () => {
+  dayjs.locale(language.value);
+};
 </script>
 
 <template>
-  <a-config-provider
-    :theme="{ algorithm: themes === 'light' ? theme.defaultAlgorithm : theme.darkAlgorithm }"
-  >
+  <a-config-provider :locale="locale">
     <router-view />
   </a-config-provider>
 </template>
-
-<style>
-.layout {
-  min-height: 100vh;
-}
-.content {
-  text-align: center;
-  min-height: 100vh;
-  /* background-color: blanchedalmond; */
-}
-</style>

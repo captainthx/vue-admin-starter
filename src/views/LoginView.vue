@@ -1,124 +1,134 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
-import type { Rule } from 'ant-design-vue/es/form'
-import { message } from 'ant-design-vue'
-import type { LoginRequest } from '@/service'
-import { useAuthStore } from '@/stores/authStore'
-import router from '@/router'
-import { Longin } from '@/service/authApi'
-import { AxiosError } from 'axios'
+import { computed, ref } from 'vue';
+import type { Rule } from 'ant-design-vue/es/form';
+import { message } from 'ant-design-vue';
+import { AxiosError } from 'axios';
+import { useAuthStore } from '@/stores/authStore';
+import type { LoginRequest } from '@/types';
+import { longin } from '@/service/authApi';
 
-const authStore = useAuthStore()
+const { transfer } = useAuthStore();
 
 const formLongin = ref<LoginRequest>({
   username: '',
   password: ''
-})
+});
 const defaultWapperCol = {
   offset: 4,
   span: 14
-}
+};
 const layout = {
-  labelCol: { span: 10 },
-  wrapperCol: { span: 5 }
-}
+  labelCol: { span: 6 },
+  wrapperCol: { span: 18 }
+};
 
 const checkUsername = (_rule: Rule, value: string) => {
   if (!value) {
-    return Promise.reject('Please input your username!')
+    return Promise.reject('Please input your username!');
   } else if (value.length < 4 || value.length > 10) {
-    return Promise.reject('Username should be 4 to 10')
+    return Promise.reject('Username should be 4 to 10');
   } else {
-    return Promise.resolve()
+    return Promise.resolve();
   }
-}
+};
 const checkPassword = (_rule: Rule, value: string) => {
   if (!value) {
-    return Promise.reject('Please input your password!')
+    return Promise.reject('Please input your password!');
   } else if (value.length < 4) {
-    return Promise.reject('Password should be 4 ')
+    return Promise.reject('Password should be 4 ');
   } else {
-    return Promise.resolve()
+    return Promise.resolve();
   }
-}
+};
 
-const rule: Record<string, Rule[]> = {
-  username: [
-    {
-      required: true,
-      validator: checkUsername,
-      trigger: 'blur'
-    }
-  ],
-  password: [
-    {
-      required: true,
-      validator: checkPassword,
-      trigger: 'blur'
-    }
-  ]
-}
+const rule = computed<Record<string, Rule[]>>(() => {
+  return {
+    username: [
+      {
+        required: true,
+        validator: checkUsername,
+        trigger: 'blur'
+      }
+    ],
+    password: [
+      {
+        required: true,
+        validator: checkPassword,
+        trigger: 'blur'
+      }
+    ]
+  };
+});
 
 const handleSubmit = async () => {
   try {
-    const res = await Longin({
+    const res = await longin({
       username: formLongin.value.username,
       password: formLongin.value.password
-    })
+    });
     if (res.status == 200) {
       if (res.data) {
-        authStore.setToken(res.data)
+        await transfer(res);
       }
-      router.push('home')
     }
   } catch (error: unknown) {
     if (typeof error === 'string') {
-      message.error('error' + error)
+      message.error('error' + error);
     } else if (error instanceof AxiosError) {
-      const axiosError = error as AxiosError
-      const responseData = axiosError.response?.data as { message: string }
-      message.error(responseData.message)
+      const axiosError = error as AxiosError;
+      const responseData = axiosError.response?.data as { message: string };
+      message.error(responseData.message);
     }
   }
-}
+};
 </script>
 
 <template>
-  <div class="content">
-    <h2>login</h2>
-    <a-form
-      class="login-form"
-      :model="formLongin"
-      name="basic"
-      :rules="rule"
-      :label-col="layout.labelCol"
-      :wrapper-col="layout.wrapperCol"
-      autocomplete="off"
-    >
-      <a-form-item hasFeedback label="Username" name="username">
-        <a-input v-model:value="formLongin.username">
-          <template #prefix><UserOutlined /></template>
-        </a-input>
-      </a-form-item>
+  <div>
+    <a-card class="centered" :title="$t('menu.login')" :style="{ width: '500px' }">
+      <a-form
+        class="login-form"
+        :model="formLongin"
+        name="basic"
+        :rules="rule"
+        :label-col="layout.labelCol"
+        :wrapper-col="layout.wrapperCol"
+        autocomplete="off"
+      >
+        <a-form-item hasFeedback label="Username" name="username">
+          <a-input v-model:value="formLongin.username">
+            <template #prefix><UserOutlined /></template>
+          </a-input>
+        </a-form-item>
 
-      <a-form-item hasFeedback label="Password" name="password">
-        <a-input-password v-model:value="formLongin.password">
-          <template #prefix><LockOutlined /></template>
-        </a-input-password>
-      </a-form-item>
-      <a-form-item :wrapper-col="{ offset: defaultWapperCol.offset, span: defaultWapperCol.span }">
-        <a-button html-type="submit" @click="handleSubmit">Submit</a-button>
-      </a-form-item>
-    </a-form>
+        <a-form-item hasFeedback label="Password" name="password">
+          <a-input-password v-model:value="formLongin.password">
+            <template #prefix><LockOutlined /></template>
+          </a-input-password>
+        </a-form-item>
+        <a-form-item :wrapper-col="{ offset: 6, span: 18 }">
+          <a-button html-type="submit" @click="handleSubmit" class="login-form-button"
+            >Submit</a-button
+          >
+        </a-form-item>
+      </a-form>
+    </a-card>
   </div>
 </template>
 
 <style scoped>
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -80%);
+}
+
 .login-form {
+  max-width: 500px;
+}
+.login-form-button {
   width: 100%;
-  height: 400px;
-  margin: 20px auto;
-  padding: 50px 0 0;
 }
 </style>
+@/types
