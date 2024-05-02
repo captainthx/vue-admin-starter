@@ -3,7 +3,7 @@ import NavbarView from '@/components/NavbarView.vue';
 import SideBarView from '@/components/SideBarView.vue';
 import { computed, ref } from 'vue';
 import { RouterView } from 'vue-router';
-import { CustomerServiceOutlined, CommentOutlined, GlobalOutlined } from '@ant-design/icons-vue';
+
 const collapsed = ref<boolean>(false);
 
 const marginLeft = computed(() => {
