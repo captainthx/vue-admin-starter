@@ -2,26 +2,13 @@
 import { GlobalOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons-vue';
 import { type ItemType } from 'ant-design-vue';
 import { computed, ref, h, onMounted } from 'vue';
-import i18n from '@/locale';
-import type { MenuItemType } from 'ant-design-vue/es/menu/src/interface';
+import i18n from '@/i18n';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/authStore';
 
 const { logout } = useAuthStore();
 const { t } = useI18n();
 const current = ref<string[]>(['0']);
-
-const languages = computed<MenuItemType[]>(() => {
-  const entities: MenuItemType[] = [];
-  for (const message of Object.values(i18n.global.messages.value)) {
-    entities.push({
-      key: message.code,
-      label: message.language,
-      onClick: () => handleClickLanguage(message.code)
-    });
-  }
-  return entities;
-});
 
 const items = computed<ItemType[]>(() => [
   {
@@ -38,27 +25,29 @@ const items = computed<ItemType[]>(() => [
   },
   {
     key: 'language',
+    label: i18n.global.locale.value,
     icon: () => h(GlobalOutlined),
-    children: languages.value
+    onClick: () => handleClickLanguage()
   }
 ]);
 
-const handleClickLanguage = (code: string) => {
-  current.value = [code];
-  if (code === i18n.global.locale.value) {
-    return;
+const handleClickLanguage = () => {
+  const currentLocale = i18n.global.locale.value;
+  const availableLocales = Object.keys(i18n.global.messages.value);
+
+  let nextLocaleIndex = availableLocales.indexOf(currentLocale) + 1;
+  if (nextLocaleIndex === availableLocales.length) {
+    nextLocaleIndex = 0;
   }
-  i18n.global.locale.value = code;
+
+  const nextLocale = availableLocales[nextLocaleIndex];
+  i18n.global.locale.value = nextLocale;
 };
 
 const handleLogout = () => {
   current.value = ['0'];
   logout();
 };
-
-onMounted(() => {
-  current.value = [i18n.global.locale.value];
-});
 </script>
 <template>
   <a-layout-header class="layout-header">

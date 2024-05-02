@@ -1,4 +1,4 @@
-import type { LoginRequest, RefreshTokenRequest, TokenResponse, ServerResponse } from '../types';
+import type { LoginRequest, RefreshTokenRequest, TokenResponse, ServerResponse } from '@/types';
 import client from './request';
 
 const longin = (body: LoginRequest): ServerResponse<TokenResponse> =>

@@ -10,7 +10,7 @@ import { longin } from '@/service/authApi';
 const { transfer } = useAuthStore();
 
 const formLongin = ref<LoginRequest>({
-  username: '',
+  name: '',
   password: ''
 });
 const defaultWapperCol = {
@@ -43,7 +43,7 @@ const checkPassword = (_rule: Rule, value: string) => {
 
 const rule = computed<Record<string, Rule[]>>(() => {
   return {
-    username: [
+    name: [
       {
         required: true,
         validator: checkUsername,
@@ -63,12 +63,12 @@ const rule = computed<Record<string, Rule[]>>(() => {
 const handleSubmit = async () => {
   try {
     const res = await longin({
-      username: formLongin.value.username,
+      name: formLongin.value.name,
       password: formLongin.value.password
     });
     if (res.status == 200) {
       if (res.data) {
-        await transfer(res);
+        transfer(res);
       }
     }
   } catch (error: unknown) {
@@ -95,8 +95,8 @@ const handleSubmit = async () => {
         :wrapper-col="layout.wrapperCol"
         autocomplete="off"
       >
-        <a-form-item hasFeedback label="Username" name="username">
-          <a-input v-model:value="formLongin.username">
+        <a-form-item hasFeedback label="Username" name="name">
+          <a-input v-model:value="formLongin.name">
             <template #prefix><UserOutlined /></template>
           </a-input>
         </a-form-item>

@@ -13,9 +13,11 @@ router.beforeEach((to, from, next) => {
     authStore.loadAuth();
     if (authStore.isAuthenticated) {
       next();
+    } else {
+      next({ name: 'login' });
     }
   }
-  next({ name: 'login' });
+  next();
 });
 
 export default router;
